@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Birthday Cake</title>
+<style>
+  body{
+    margin:0;
+    font-family:Segoe UI,Arial,sans-serif;
+    background:#fff7f0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px;
+  }
+  h1{margin:8px 0 16px;font-size:28px;font-weight:700;}
+  p{margin:0 0 18px;color:#444;font-size:14px;}
+
+  .stage{display:flex;justify-content:center;align-items:flex-end;width:100%;padding:10px;position:relative;}
+  .cake{width:260px;display:flex;flex-direction:column;align-items:center;position:relative;}
+  .icing{width:200px;height:40px;background:#fff0f5;border-radius:20px 20px 10px 10px;z-index:6;margin-bottom:-6px;}
+  .layer-mid{width:220px;height:80px;background:#f7c7b2;border-radius:10px;z-index:4;margin-top:-4px;}
+  .layer-base{width:200px;height:50px;background:#d97b63;border-radius:8px;margin-top:8px;z-index:2;}
+
+  /* Candles */
+  .candles{position:absolute;top:-30px;display:flex;gap:18px;z-index:12;}
+  .candle{width:14px;background:#fff;border-radius:4px;position:relative;}
+  .c1{height:40px;transform:translateY(6px);} 
+  .c2{height:60px;} 
+  .c3{height:40px;transform:translateY(6px);}
+  .wick{width:2px;height:8px;background:#2b2b2b;position:relative;top:-4px;margin:0 auto;}
+  .flame{
+    position:relative;
+    top:-16px;
+    margin:0 auto;
+    width:12px;height:18px;
+    border-radius:50%;
+    background:radial-gradient(ellipse at center, #ffd54a 0%, #ff7043 80%);
+    animation:flame-flicker 700ms infinite;
+  }
+  .flame.out{opacity:0;transform:scale(0.4) translateY(-6px);transition:all 300ms ease;}
+  @keyframes flame-flicker{
+    0%{transform:translateY(0) scale(1);}
+    40%{transform:translateY(-2px) scale(1.1);}
+    70%{transform:translateY(0) scale(0.95);}
+    100%{transform:translateY(0) scale(1);}
+  }
+
+  .controls{margin-top:18px;}
+  .btn{background:#1976d2;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:600;cursor:pointer;}
+
+  .msg{margin-top:12px;min-height:22px;font-weight:600;color:#333;}
+
+  /* Falling button */
+  .fall-btn{
+    position:fixed;
+    top:-60px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#e53935;
+    color:#fff;
+    padding:12px 24px;
+    border-radius:8px;
+    font-weight:700;
+    text-decoration:none;
+    box-shadow:0 6px 18px rgba(0,0,0,0.2);
+    animation:fall 30s ease forwards;
+  }
+  @keyframes fall{
+    0%{top:-60px;opacity:0;}
+    30%{opacity:1;}
+    100%{top:70%;opacity:1;}
+  }
+</style>
+</head>
+<body>
+  <h1>Happy Birthday</h1>
+  <p>Blow into the microphone to blow out the candles.</p>
+
+  <div class="stage">
+    <div class="cake">
+      <div class="candles">
+        <div class="candle c1"><div class="flame" id="flame1"></div><div class="wick"></div></div>
+        <div class="candle c2"><div class="flame" id="flame2"></div><div class="wick"></div></div>
+        <div class="candle c3"><div class="flame" id="flame3"></div><div class="wick"></div></div>
+      </div>
+      <div class="icing"></div>
+      <div class="layer-mid"></div>
+      <div class="layer-base"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="startBtn">Enable Mic & Start</button>
+  </div>
+
+  <div class="msg" id="msg">Tip: Allow microphone when asked.</div>
+
+  <audio id="song" src="birthday.mp3" preload="auto"></audio>
+
+<script>
+(function(){
+  const startBtn=document.getElementById('startBtn');
+  const msg=document.getElementById('msg');
+  const flames=[document.getElementById('flame1'),document.getElementById('flame2'),document.getElementById('flame3')];
+  const song=document.getElementById('song');
+  let audioContext, analyser, source, rafId;
+  let activated=false;
+  // 🔊 Adjust this sensitivity
+  const BLOW_THRESHOLD=0.10; 
+  const REQUIRED_DURATION=10; // ms
+
+  let loudStart=null;
+
+  function blowOut(){
+    if(activated) return;
+    activated=true;
+    msg.textContent='Candles blown! 🎂';
+    flames.forEach(f=>f.classList.add('out'));
+    try{ song.currentTime=0; song.play().catch(()=>{});}catch(e){}
+    const btn=document.createElement('a');
+    btn.className='fall-btn';
+    btn.href='page2.html';
+    btn.textContent='CLICK';
+    document.body.appendChild(btn);
+  }
+
+  function getRMS(data){
+    let sum=0;
+    for(let i=0;i<data.length;i++){let v=(data[i]-128)/128;sum+=v*v;}
+    return Math.sqrt(sum/data.length);
+  }
+
+  function startListening(){
+    if(audioContext) return;
+    audioContext=new (window.AudioContext||window.webkitAudioContext)();
+    navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+      source=audioContext.createMediaStreamSource(stream);
+      analyser=audioContext.createAnalyser();
+      analyser.fftSize=1024;
+      source.connect(analyser);
+      const data=new Uint8Array(analyser.fftSize);
+      function tick(){
+        analyser.getByteTimeDomainData(data);
+        const rms=getRMS(data);
+        if(!activated){
+          if(rms>BLOW_THRESHOLD){
+            if(!loudStart) loudStart=performance.now();
+            else if(performance.now()-loudStart>REQUIRED_DURATION){blowOut();}
+          }else loudStart=null;
+        }
+        rafId=requestAnimationFrame(tick);
+      }
+      tick();
+    }).catch(err=>{msg.textContent='Microphone access denied.';});
+  }
+
+  startBtn.addEventListener('click',async()=>{
+    try{if(audioContext&&audioContext.state==='suspended')await audioContext.resume();}catch(e){}
+    startListening();
+    startBtn.disabled=true;
+    startBtn.textContent='Listening...';
+    // 10 sec fallback
+    setTimeout(()=>{if(!activated)blowOut();},10000);
+  });
+})();
+</script>
+</body>
+</html>

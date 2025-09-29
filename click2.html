@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moving Button</title>
+  <style>
+    body {
+      margin:0;
+      height:100vh;
+      background:#f0f0f0;
+      overflow:hidden;
+      position:relative;
+    }
+    button {
+      position:absolute;
+      padding:15px 30px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      background:#1976d2;
+      color:white;
+      border:none;
+      border-radius:8px;
+      transition:all 0.1s ease;
+    }
+  </style>
+</head>
+<body>
+	
+  <button id="trickyBtn">Click Me</button>
+
+  <script>
+    const btn = document.getElementById("trickyBtn");
+
+    // redirect on click
+    btn.addEventListener("click", () => {
+      window.location.href = "page1.html";
+    });
+
+    function moveButton() {
+      const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+      const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+      btn.style.left = x + "px";
+      btn.style.top = y + "px";
+    }
+
+    // move fast (every 100ms)
+    setInterval(moveButton, 300);
+
+    // also move if user hovers near it
+    btn.addEventListener("mouseenter", moveButton);
+  </script>
+</body>
+</html>

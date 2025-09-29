@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      text-align: center;
+      transition: background 0.8s ease;
+      position: relative;
+      padding: 20px;
+    }
+
+    /* Decorative Border */
+    .border-frame {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      pointer-events: none;
+      box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.1);
+      transition: all 0.8s ease;
+    }
+
+    .border-frame.active {
+      border-color: rgba(255, 215, 0, 0.6);
+      box-shadow: inset 0 0 50px rgba(255, 215, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Corner decorations */
+    .corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.8s ease;
+    }
+
+    .corner.top-left {
+      top: 5px;
+      left: 5px;
+      border-right: none;
+      border-bottom: none;
+      border-radius: 20px 0 0 0;
+    }
+
+    .corner.top-right {
+      top: 5px;
+      right: 5px;
+      border-left: none;
+      border-bottom: none;
+      border-radius: 0 20px 0 0;
+    }
+
+    .corner.bottom-left {
+      bottom: 5px;
+      left: 5px;
+      border-right: none;
+      border-top: none;
+      border-radius: 0 0 0 20px;
+    }
+
+    .corner.bottom-right {
+      bottom: 5px;
+      right: 5px;
+      border-left: none;
+      border-top: none;
+      border-radius: 0 0 20px 0;
+    }
+
+    .corner.active {
+      border-color: rgba(255, 215, 0, 0.8);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    }
+
+    body.rainbow-bg {
+      background: linear-gradient(45deg, #ff0844, #ffb199, #ffd700, #44ff88, #4facfe, #bf40bf, #ff0844);
+      background-size: 400% 400%;
+      animation: rainbowMove 4s ease infinite;
+    }
+
+    @keyframes rainbowMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      margin: 150px 0 30px 0;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+      font-weight: bold;
+      letter-spacing: 2px;
+      z-index: 10;
+      position: relative;
+      background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s ease infinite;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: -20px;
+      margin-bottom: 20px;
+      z-index: 10;
+      position: relative;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Hanging Lights Container */
+    .lights-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .light-wrapper {
+      position: absolute;
+      top: 0;
+    }
+
+    .rope {
+      width: 2px;
+      background: rgba(255, 255, 255, 0.4);
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .light {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2a2a2a;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.4;
+      transition: all 0.5s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      z-index: 1;
+    }
+
+    .light.on {
+      opacity: 1;
+      animation: glow 1.2s infinite alternate;
+      border-color: currentColor;
+    }
+
+    @keyframes glow {
+      from { 
+        box-shadow: 0 0 15px currentColor, 0 0 25px currentColor, 0 2px 8px rgba(0, 0, 0, 0.6);
+        transform: translateX(-50%) scale(1);
+      }
+      to { 
+        box-shadow: 0 0 25px currentColor, 0 0 45px currentColor, 0 2px 8px rgba(0, 0, 0, 0.6);
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+
+    /* Gift Box Container */
+    .gift-container {
+      margin-top: auto;
+      margin-bottom: 100px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .gift-box {
+      width: 260px;
+      height: 180px;
+      border: 5px solid #c62828;
+      border-radius: 12px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      transition: all 0.6s ease;
+    }
+
+    .gift-box::before {
+      content: '';
+      position: absolute;
+      width: 50px;
+      height: 100%;
+      background: linear-gradient(180deg, #c62828 0%, #b71c1c 100%);
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .gift-box::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 50px;
+      background: linear-gradient(90deg, #c62828 0%, #b71c1c 100%);
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .gift-box.glow {
+      background: linear-gradient(135deg, #fff9c4 0%, #ffeb3b 100%);
+      box-shadow: 0 0 50px rgba(255, 235, 59, 0.8), 0 0 100px rgba(255, 235, 59, 0.6), 0 15px 40px rgba(0, 0, 0, 0.4);
+      transform: scale(1.08) rotate(2deg);
+      animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1.08) rotate(2deg); }
+      50% { transform: scale(1.12) rotate(-2deg); }
+    }
+
+    /* Confetti particles */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ffd700;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .confetti.active {
+      animation: confettiFall 2s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { 
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      100% { 
+        opacity: 0;
+        transform: translateY(500px) rotate(720deg);
+      }
+    }
+
+    /* Button */
+    .hidden-btn {
+      display: none;
+    }
+
+    .show-btn {
+      display: block;
+      animation: popIn 0.5s ease;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    button {
+      padding: 16px 36px;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      cursor: pointer;
+      z-index: 20;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    /* Instruction text */
+    .instruction {
+      position: absolute;
+      bottom: 30px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      z-index: 10;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    .instruction.hidden {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="border-frame" id="borderFrame"></div>
+  <div class="corner top-left" id="corner1"></div>
+  <div class="corner top-right" id="corner2"></div>
+  <div class="corner bottom-left" id="corner3"></div>
+  <div class="corner bottom-right" id="corner4"></div>
+
+  <h1>Happy Birthday! 🎉</h1>
+
+  <div class="lights-container" id="lightsContainer"></div>
+
+  <div class="gift-container">
+    <div class="gift-box" id="giftBox">
+      <button id="clickBtn" class="hidden-btn" onclick="location.href='click1.html'">Open Gift</button>
+    </div>
+  </div>
+
+  <div class="instruction" id="instruction">Shake your device to light up! ✨</div>
+
+  <audio id="lightSound" src="light.mp3"></audio>
+
+  <script>
+    const giftBox = document.getElementById("giftBox");
+    const clickBtn = document.getElementById("clickBtn");
+    const sound = document.getElementById("lightSound");
+    const body = document.body;
+    const lightsContainer = document.getElementById("lightsContainer");
+    const borderFrame = document.getElementById("borderFrame");
+    const instruction = document.getElementById("instruction");
+    const corners = [
+      document.getElementById("corner1"),
+      document.getElementById("corner2"),
+      document.getElementById("corner3"),
+      document.getElementById("corner4")
+    ];
+    let activated = false;
+
+    // Create hanging lights
+    const colors = ['#ff0044', '#ff6600', '#ffdd00', '#44ff44', '#4488ff', '#aa44ff'];
+    const numLights = 14;
+    const screenWidth = window.innerWidth;
+
+    for (let i = 0; i < numLights; i++) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'light-wrapper';
+      wrapper.style.left = (i * (screenWidth / (numLights - 1))) + 'px';
+      
+      const ropeHeight = 60 + (i % 2 === 0 ? 50 : 0);
+      
+      const rope = document.createElement('div');
+      rope.className = 'rope';
+      rope.style.height = ropeHeight + 'px';
+      
+      const light = document.createElement('div');
+      light.className = 'light';
+      light.style.top = ropeHeight + 'px';
+      light.style.background = colors[i % colors.length];
+      
+      wrapper.appendChild(rope);
+      wrapper.appendChild(light);
+      lightsContainer.appendChild(wrapper);
+    }
+
+    function createConfetti() {
+      const colors = ['#ffd700', '#ff69b4', '#00ff00', '#00bfff', '#ff6347'];
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * window.innerWidth + 'px';
+          confetti.style.top = '50%';
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = (Math.random() * 10 + 5) + 'px';
+          confetti.style.height = (Math.random() * 10 + 5) + 'px';
+          body.appendChild(confetti);
+          
+          setTimeout(() => confetti.classList.add('active'), 10);
+          setTimeout(() => confetti.remove(), 2000);
+        }, i * 50);
+      }
+    }
+
+    function turnOnLights() {
+      if (activated) return;
+      activated = true;
+      
+      // Hide instruction
+      instruction.classList.add('hidden');
+      
+      // Turn on all lights with stagger
+      const allLights = document.querySelectorAll('.light');
+      allLights.forEach((light, index) => {
+        setTimeout(() => {
+          light.classList.add('on');
+        }, index * 80);
+      });
+      
+      // Activate borders and corners
+      setTimeout(() => {
+        borderFrame.classList.add('active');
+        corners.forEach(corner => corner.classList.add('active'));
+      }, 500);
+      
+      // Change background to rainbow
+      setTimeout(() => {
+        body.classList.add('rainbow-bg');
+      }, 800);
+      
+      // Glow the gift box and show button
+      setTimeout(() => {
+        giftBox.classList.add("glow");
+        clickBtn.classList.remove("hidden-btn");
+        clickBtn.classList.add("show-btn");
+        createConfetti();
+      }, 1200);
+      
+      sound.play().catch(e => console.log('Audio play failed:', e));
+    }
+
+    // Shake detection
+    let lastX = null, lastY = null, lastZ = null;
+    let threshold = 15;
+
+    window.addEventListener("devicemotion", function(e) {
+      let acc = e.accelerationIncludingGravity;
+      if (!acc.x || !acc.y || !acc.z) return;
+
+      if (lastX !== null) {
+        let deltaX = Math.abs(acc.x - lastX);
+        let deltaY = Math.abs(acc.y - lastY);
+        let deltaZ = Math.abs(acc.z - lastZ);
+
+        if (deltaX + deltaY + deltaZ > threshold) {
+          turnOnLights();
+        }
+      }
+
+      lastX = acc.x; 
+      lastY = acc.y; 
+      lastZ = acc.z;
+    });
+
+    // Click to activate (for desktop)
+    document.addEventListener('click', function() {
+      if (!activated) {
+        turnOnLights();
+      }
+    });
+
+    // Fallback: after 5s, auto show button if not shaken
+    setTimeout(turnOnLights, 5000);
+  </script>
+</body>
+</html>
